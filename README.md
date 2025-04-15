@@ -1,6 +1,6 @@
 <h1>Organization Reputation Manager Redux<img align="right" src="./Data/image.png" width="100px"></h1>
 
-Content library that allows users to keep track and collect rewards from custom organizations. This content library was re-completed because the original Organization Reputation Manager was sometimes confusing to setup and so I worked with AI to better the process.
+Fully customizable thresholds on rewards for each organization. Want to have players save up for a juicy 100 rep reward? Want to provide a reward for the sake of providing a reward (0 rep) then this is the content library for you. This content library now supports a log to allow staff members to verify that players are being honest (and for those who want to show off how fast they got rep points). This content library was re-completed because the original Organization Reputation Manager was sometimes confusing to setup and so I worked with AI to better the process.
 
 [Table of Contents](https://github.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/blob/main/ToC.md)
 [Shadow's Main Website](https://shadow-draconic-development.github.io/.github/)
