@@ -1,0 +1,137 @@
+multiline
+<drac2>
+
+
+def grab_organization_dictionaries() -> dict:
+    """
+    Creates dictionary containing all the organizations
+    
+    Return:
+        dict: Dictionary containing organization dictionaries
+    """
+
+    # Grabs organization settings list/dictionary
+    organization_test = get_svar("org_settings")
+
+    # If svar exists
+    if organization_test:
+        organization_container = load_json(organization_test)
+
+    # If svar does not exist
+    else:
+        return ['Error', 'svar `org_settings` does not exist!']
+
+    # If svar is using legacy dictionary
+    if typeof(organization_container) == "SafeDict":
+        container = organization_container.values()
+
+    # If svar is using updated list style
+    elif typeof(organization_container) == "SafeList":
+        container = organization_container
+
+    # If for some reason this is a string
+    else:
+        container = [str(organization_container)]
+
+    full_organization_dictionary = dict()
+
+    # It will search gvars and svars to pull dictionaries
+    for item in container:
+
+        # Tries to search svar
+        svar_test = get_svar(item)
+
+        # If svar exists, load dictionary
+        if svar_test:
+            test_dictionary = load_json(svar_test)
+
+            # Try to search for name
+            try:
+
+                if "name" in test_dictionary.keys():
+                    key_result = test_dictionary.pop("name")
+
+                else:
+                    key_result = None
+
+            # If there is a problem loading dictionary
+            except:
+                key_result = None
+
+        # If svar doesn't exist, try to search gvar
+        else:
+            gvar_test = get_gvar(item)
+
+            # If gvar exists, load dictionary
+            if gvar_test:
+                test_dictionary = load_json(gvar_test)
+
+                # Try to search for name
+                try:
+
+                    if "name" in test_dictionary.keys():
+                        key_result = test_dictionary.pop("name")
+
+                    else:
+                        key_result = None
+
+                # If there is a problem loading dictionary
+                except:
+                    key_result = None
+
+            # If gvar does not exist
+            else:
+                key_result = None
+
+        # If it finds a name
+        if key_result:
+            full_organization_dictionary[test_dictionary[key_result[0]]] = test_dictionary
+
+        # If it doesn't find a name
+        else:
+            pass
+
+    return full_organization_dictionary
+
+
+def main() -> tuple[str]:
+    """
+    Main program function
+
+    Return:
+        str: Embed string
+        str: SVAR string
+    """
+
+    # Set defaults
+    prefix = ctx.prefix
+    footer = f"{prefix}rep import old | 4/9/25 | ShadowsStride"
+
+    # If SVAR does not exist, load empty dictionary
+    if not (svar_dict := get_svar("org_rep_settings")):
+        svar_dict = {}
+
+    # If SVAR does exist, load dictionary
+    else:
+        svar_dict = load_json(svar_dict)
+
+    # Grab old SVAR dictionaries
+    old_svar_dict = grab_organization_dictionaries()
+
+    # If an error has occurred
+    if typeof(old_svar_dict) == "SafeList":
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '{old_svar_dict[1]} (No data to import from old version of this alias)' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'", ""
+
+    # Merge old and new dictionaries
+    svar_dict = svar_dict | old_svar_dict
+
+    return f"{prefix}embed -title 'Importing Old Data' -f 'Success! You may now delete old SVARs' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'", f"{prefix}svar org_rep_settings {dump_json(svar_dict)}"
+
+
+# Main program function
+embed_str, svar_str = main()
+
+
+</drac2>
+{{embed_str}}
+{{svar_str}}

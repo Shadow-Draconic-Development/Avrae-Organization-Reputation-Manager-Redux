@@ -1,0 +1,54 @@
+multiline
+<drac2>
+
+
+def main(input_dict: dict) -> tuple[str]:
+    """
+    Main program function
+
+    Args:
+        input_dict (dict): Input dictionary
+
+    Return:
+        str: embed string
+        str: SVAR string
+    """
+
+    # Setup defaults
+    prefix = ctx.prefix
+    footer = f"{prefix}rep import [JSON string] | 4/14/25 | ShadowsStride"
+
+    # If SVAR does not exist, load empty dictionary
+    if not (svar_dict := get_svar("org_rep_settings")):
+        svar_dict = {}
+
+    # If SVAR does exist, load dictionary
+    else:
+        svar_dict = load_json(svar_dict)
+
+    # Merge old and new dictionaries (Only merges at the initial key: value level)
+    svar_dict = svar_dict | input_dict
+
+    # Create copy of new SVAR
+    test_dict = svar_dict.copy()
+
+    # For each key, value in SVAR
+    for key, value in test_dict.items():
+
+        # If value is a string, remove key from SVAR
+        if typeof(value) == "str":
+            svar_dict.pop(key)
+
+    return f"{prefix}embed -title 'Importing New Data' -f 'Success!' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'", f"{prefix}svar org_rep_settings {dump_json(svar_dict)}"
+
+
+# Grab inputs
+input_list = &ARGS&
+
+# Main program function
+embed_str, svar_str = main(load_json(input_list[0]))
+
+
+</drac2>
+{{embed_str}}
+{{svar_str}}

@@ -21,4 +21,4 @@ Allows administrators (requires administrative privileges) to import organizatio
     - Simply paste the output of the JSON provided from generator
 
 ## Subalias Markdown
-`old`: [old](https://github.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/blob/main/Code/import/old/old.md)
+`old`: [Markdown](https://github.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/blob/main/Code/import/old/old.md)

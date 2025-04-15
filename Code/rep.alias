@@ -1,0 +1,297 @@
+embed
+<drac2>
+
+
+def search_list(query: str, item_list: list[str]) -> list[str]|None:
+    """
+    Searches for item in list.
+
+    Args:
+        query (str): The query being made
+        item_list (list): List of items
+
+    Return:
+        list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
+    """
+
+    # Finds at least 1 match
+    if len(item_results := [item for item in item_list if query.lower() in item.lower()]) > 0:
+        return item_results
+
+    # If it finds no matches
+    else:
+        return None
+
+
+def multiple_match_determine(search_result: list[str], input_value: str) -> str|bool:
+    """
+    Determines if there is an exact match in search results
+    
+    Args:
+        search_result (list[str]): List of search results
+        input_value (str): Input value to match
+
+    Returns:
+        str|bool: The exact match if found, otherwise False
+    """
+
+    for match in search_result:
+        if match.lower() == input_value.lower():
+            return match
+
+    return False
+
+
+def log_entry(ch: character, organization_name: str, delta: int, total: int, img_url: str, color: str) -> None:
+    """
+    Logs an entry into repLog
+
+    Args:
+        ch (character): Character object
+        organization_name (str): Name of organization
+        delta (int): Change in CC
+    """
+
+    # Check to see if repLog exists already
+    rep_log_test = ch.get_cvar("repLog", default=None)
+
+    # Grab time and time string
+    epoch_time = floor(time())
+    time_str = f"<t:{epoch_time}:d> <t:{epoch_time}:T> **Change:** {delta} **Total:** {total}"
+
+    # If repLog exists
+    if rep_log_test:
+        rep_log_dict = load_json(rep_log_test)
+
+    # If repLog does not exist
+    else:
+        rep_log_dict = dict()
+    
+    # If the organization exists in the log
+    if organization_name in rep_log_dict.keys():
+        if "log" in rep_log_dict[organization_name].keys():
+            rep_log_dict[organization_name]['log'].append(time_str)
+
+        else:
+            rep_log_dict[organization_name]['log'] = [time_str]
+
+        rep_log_dict[organization_name]["img_url"] = img_url
+        rep_log_dict[organization_name]["color"] = color
+
+
+    # If the organization does not exist in the log
+    else:
+        rep_log_dict[organization_name] = {"log": [time_str], "img_url": img_url, "color": color}
+
+    # Update cvar
+    ch.set_cvar("repLog", dump_json(rep_log_dict))
+
+
+def update_cc(ch: character, organization_name: str, delta: int, img_url: str, color: str) -> int:
+    """
+    Updates/creates reputation counter
+
+    Args:
+        ch (character): Character object
+        organization_name (str): Name of organization
+        delta (int) Change in CC
+
+    Return:
+        (int): New value of CC
+    """
+
+    # If rep cc exists already, store cc
+    if ch.cc_exists(f"Rep - {organization_name}"):
+        rep_cc = ch.cc(f"Rep - {organization_name}")
+
+    # If rep cc doesn't exist, create and store cc
+    else:
+        rep_cc = ch.create_cc(
+            name=f"Rep - {organization_name}",
+            minVal="0",
+            maxVal=None,
+            reset=None,
+            dispType=None,
+            title=f"Rep - {organization_name}",
+            desc=f"Reputation with {organization_name}",
+            initial_value="0"
+        )
+
+    # Modify cc by delta
+    rep_cc.mod(delta)
+
+    # If there is a change, log entry
+    if delta != 0:
+        log_entry(ch, organization_name, delta, rep_cc.value, img_url, color)
+
+    # If there was not a change
+    else:
+        pass
+
+    return rep_cc.value
+
+
+def get_rewards(ch: character, org_name: str, org_dict: dict, delta: int) -> list[str]:
+    """
+    Constructs alias output
+
+    Args:
+        ch (character): Character object
+        org_name (str): Name of organization
+        org_dict (dict): Organization dictionary
+        delta (int): Change in CC
+
+    Return:
+        (list[str]): Result
+    """
+
+    img_url = org_dict.pop("imgurl", default="https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png")
+    color = org_dict.pop("color", default="")
+
+    cc_value = update_cc(ch, org_name, delta, img_url, color)
+
+    # Builds rewards list
+    rewards_list = ["***Current Redemption/Reward List:***", ""]
+
+    # For each key in the organization dictionary
+    for key in org_dict.keys():
+        
+        # Try to turn key into integer
+        try:
+            int(key)
+            # If current cc value is greater than key threshold
+            if cc_value >= int(key):
+
+                if int(key) != 1:
+                    # Add threshold header
+                    rewards_list.append(f"**{key} Points:**")
+
+                else:
+                    rewards_list.append(f"**{key} Point:**")
+
+                # Add rewards within threshold
+                for reward in org_dict[key]:
+                    rewards_list.append(reward)
+
+                # Add divider
+                rewards_list.append("")
+
+            # If current cc value is not greater than key threshold
+            else:
+                pass
+
+        # If key is not an integer
+        except:
+            pass
+
+    # If there were any available rewards
+    if len(rewards_list) > 2:
+        rewards_list.pop(1)
+
+    # If there were no available rewards
+    else:
+        rewards_list[1] = "None"
+
+    # If change was positive
+    if delta > 0:
+        verb_str = f"added {delta} to"
+
+    # If change was negative
+    elif delta < 0:
+        verb_str = f"removed {abs(delta)} from"
+
+    # Checking reputation
+    else:
+        verb_str = "is checking"
+
+    # Adding header
+    rewards_list.insert(0, f"**Current Reputation:** {cc_value}")
+    rewards_list.insert(1, "")
+
+    return f"{name} {verb_str} Their Reputation With {org_name}", "\n".join(rewards_list), color, img_url
+
+
+def main(input_list: list[str]) -> tuple[str]:
+    """
+    Main program function
+    
+    Args:
+        input_list (list[str]): List of inputs
+
+    Return:
+        str: Title
+        str: Main body paragraph
+        str: Color Hex Code
+        str: Image URL
+    """
+
+
+    # If character is not selected
+    if not (ch := character()):
+        return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If SVAR exists, load dictionary
+    if (svar_dict := get_svar("org_rep_settings")):
+        svar_dict = load_json(svar_dict)
+
+    # If SVAR does not exist, throw error
+    else:
+        return "You Have Been Sneak Attacked by an Error", "`org_rep_settings` SVAR has not been setup", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If there isn't at least one input
+    if len(input_list) < 1:
+        return "You Have Been Sneak Attacked by an Error", "Expected at least one argument", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+    
+    # If it finds at least one match (searching for organization names)
+    if (search_result := search_list(input_list[0], svar_dict.keys())):
+
+        # If it find exactly one match
+        if len(search_result) == 1:
+            input_list[0] = search_result[0]
+
+        # If it finds more than one match
+        else:
+
+            # If there is an exact match
+            if (search_result2 := multiple_match_determine(search_result, input_list[0])):
+                input_list[0] = search_result2
+
+            # If there is not an exact match
+            else:
+                search_result.insert(0, "**Multiple Matches Found:**")
+
+                return "You Have Been Sneak Attacked by an Error", "\n".join(search_result), "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If no matches were found
+    else:
+        return "You Have Been Sneak Attacked by an Error", "Organization not found", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If there are at least 2 inputs
+    if len(input_list) > 1:
+
+        # Try to convert second input into a number
+        try:
+            input_list[1] = int(input_list[1])
+
+        # If second input is not a number
+        except:
+            input_list[1] = 0
+
+    # If there aren't at least 2 inputs
+    else:
+        input_list.append(0)
+    
+    return get_rewards(ch, input_list[0], svar_dict[input_list[0]], input_list[1])
+
+
+# Main program function, "<" because Avrae is dumb
+title, f, color, thumb = main(&ARGS&)
+l = "<"
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-color "{{color}}"
+-thumb "{{thumb}}"
+-footer "{{ctx.prefix}}rep [organization name] {{l}}#> | 3/8/2025 | ShadowsStride"

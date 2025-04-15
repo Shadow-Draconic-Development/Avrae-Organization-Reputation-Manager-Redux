@@ -1,0 +1,63 @@
+embed
+<drac2>
+
+
+def get_details(organization_dictionary: dict) -> list[str]:
+    """
+    Grabs known organization names
+
+    Args:
+        organization_dictionary (dict): Organization dictionary
+
+    Return:
+        (list[str]): Result
+    """
+
+    # Builds rewards list
+    names_list = ["***Known Organizations:***"]
+
+    # If there are no items in the organization dictionary
+    if len(organization_dictionary.keys()) == 0:
+        names_list.append("None")
+
+    # If there are items in the organization dictionary
+    else:
+        for name in organization_dictionary.keys():
+            names_list.append(name)
+
+
+    return f"{name} Checks Known Organizations", "\n".join(names_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png", ""
+
+
+def main(input_list: list[str]) -> list[str]:
+    """
+    Main program function
+
+    Args:
+        input_list (list[str]): List of inputs
+
+    Return:
+        (list[str]): Result
+    """
+
+    # If SVAR exists, load dictioanry
+    if (svar_dict := get_svar("org_rep_settings")):
+        svar_dict = load_json(svar_dict)
+
+    # If SVAR does not exist, throw error
+    else:
+        return "You Have Been Sneak Attacked by an Error", "`org_rep_settings` SVAR has not been setup", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png", "#CF142B"
+
+    return get_details(svar_dict)
+
+
+# Main function
+title, f, thumb, color = main(&ARGS&)
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-thumb "{{thumb}}"
+-color "{{color}}"
+-footer "!rep list | 4/9/25 | ShadowsStride"

@@ -1,0 +1,163 @@
+embed
+<drac2>
+
+
+def search_list(query: str, item_list: list[str]) -> list[str]|None:
+    """
+    Searches for item in list.
+
+    Args:
+        query (str): The query being made
+        item_list (list): List of items
+
+    Return:
+        list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
+    """
+
+    # Finds at least 1 match
+    if len(item_results := [item for item in item_list if query.lower() in item.lower()]) > 0:
+        return item_results
+
+    # If it finds no matches
+    else:
+        return None
+
+
+def multiple_match_determine(search_result: list[str], input_value: str) -> str|bool:
+    """
+    Determines if there is an exact match in search results
+    
+    Args:
+        search_result (list[str]): List of search results
+        input_value (str): Input value to match
+
+    Returns:
+        str|bool: The exact match if found, otherwise False
+    """
+
+    for match in search_result:
+        if match.lower() == input_value.lower():
+            return match
+
+    return False
+
+
+def get_rewards(org_name: str, org_dict: dict) -> list[str]:
+    """
+    Constructs alias output
+
+    Args:
+        ch (character): Character object
+        org_name (str): Name of organization
+        org_dict (dict): Organization dictionary
+
+    Return:
+        (list[str]): Result
+    """
+
+    # Sets img_url and color
+    img_url = org_dict.pop("imgurl", default="https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png")
+    color = org_dict.pop("color", default="")
+
+    # Builds rewards list
+    rewards_list = ["***Current Redemption List:***", ""]
+
+    # For each key in the organization dictionary
+    for key in org_dict.keys():
+        
+        # Try to turn key into integer
+        try:
+            int(key)
+
+            # Add threshold header
+            rewards_list.append(f"**{key} Points:**")
+
+            # Add rewards within threshold
+            for reward in org_dict[key]:
+                rewards_list.append(reward)
+
+            # Add divider
+            rewards_list.append("")
+
+        # If key is not an integer
+        except:
+            pass
+
+    # If there were any available rewards
+    if len(rewards_list) > 2:
+        rewards_list.pop(1)
+
+    # If there were no available rewards
+    else:
+        rewards_list[1] = "None"
+
+    return f"Rewards For {org_name}", "\n".join(rewards_list), img_url, color
+
+
+def main(input_list: list[str]) -> tuple[str]:
+    """
+    Main program function
+    
+    Args:
+        input_list (list[str]): List of inputs
+
+    Return:
+        str: Title
+        str: Main body paragraph
+        str: Color Hex Code
+        str: Image URL
+    """
+
+    # If character is not selected
+    if not (ch := character()):
+        return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If SVAR exists, load dictionary
+    if (svar_dict := get_svar("org_rep_settings")):
+        svar_dict = load_json(svar_dict)
+
+    # If SVAR does not exist, throw error
+    else:
+        return "You Have Been Sneak Attacked by an Error", "`org_rep_settings` SVAR has not been setup", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If there isn't at least 1 input
+    if len(input_list) < 1:
+        return "You Have Been Sneak Attacked by an Error", "Expected at least one argument", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+    
+    # If it finds at least one match (searching for organization names)
+    if (search_result := search_list(input_list[0], svar_dict.keys())):
+
+        # If it finds exactly one match
+        if len(search_result) == 1:
+            input_list[0] = search_result[0]
+
+        # If it finds multiple matches
+        else:
+
+            # If finds exact match
+            if (search_result2 := multiple_match_determine(search_result, input_list[0])):
+                input_list[0] = search_result2
+
+            # If it does not find exact match
+            else:
+                search_result.insert(0, "**Multiple Matches Found:**")
+
+                return "You Have Been Sneak Attacked by an Error", "\n".join(search_result), "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    # If it finds no matches
+    else:
+        return "You Have Been Sneak Attacked by an Error", "Organization not found", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
+    return get_rewards(input_list[0], svar_dict[input_list[0]])
+
+
+# Main program function
+title, f, color, thumb = main(&ARGS&)
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-color "{{color}}"
+-thumb "{{thumb}}"
+-footer "{{ctx.prefix}}rep rewards [organization name] | 4/8/2025 | ShadowsStride"
