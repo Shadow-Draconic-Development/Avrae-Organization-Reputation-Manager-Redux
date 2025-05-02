@@ -22,8 +22,8 @@ def get_details(organization_dictionary: dict) -> list[str]:
 
     # If there are items in the organization dictionary
     else:
-        for name in organization_dictionary.keys():
-            names_list.append(name)
+        for org_name in organization_dictionary.keys():
+            names_list.append(org_name)
 
 
     return f"{name} Checks Known Organizations", "\n".join(names_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png", ""
@@ -60,4 +60,4 @@ title, f, thumb, color = main(&ARGS&)
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "!rep list | 4/9/25 | ShadowsStride"
+-footer "!rep list | 5/1/25 | ShadowsStride"
