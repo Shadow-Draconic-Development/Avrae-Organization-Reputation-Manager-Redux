@@ -81,9 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function createRewardInput(thresholdDiv) {
-        const rewardDiv = document.createElement('div');
-        rewardDiv.className = 'reward';
+    function createRewardInput(thresholdSection) {
+        const rewardSection = document.createElement('section');
+        rewardSection.className = 'reward';
         const rewardInput = document.createElement('input');
         rewardInput.type = 'text';
         rewardInput.placeholder = 'Reward';
@@ -92,18 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const removeRewardButton = document.createElement('button');
         removeRewardButton.textContent = 'Remove Reward';
         removeRewardButton.addEventListener('click', () => {
-            rewardDiv.remove();
+            rewardSection.remove();
             updateJSON();
         });
 
-        rewardDiv.appendChild(rewardInput);
-        rewardDiv.appendChild(removeRewardButton);
-        thresholdDiv.appendChild(rewardDiv);
+        rewardSection.appendChild(rewardInput);
+        rewardSection.appendChild(removeRewardButton);
+        thresholdSection.appendChild(rewardSection);
     }
 
     function createThresholdInput(deck) {
-        const thresholdDiv = document.createElement('div');
-        thresholdDiv.className = 'threshold';
+        const thresholdSection = document.createElement('section');
+        thresholdSection.className = 'threshold';
 
         const pointsInput = document.createElement('input');
         pointsInput.type = 'number';
@@ -114,20 +114,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const addRewardButton = document.createElement('button');
         addRewardButton.textContent = 'Add Reward';
         addRewardButton.addEventListener('click', () => {
-            createRewardInput(thresholdDiv);
+            createRewardInput(thresholdSection);
         });
 
         const removeThresholdButton = document.createElement('button');
         removeThresholdButton.textContent = 'Remove Threshold';
         removeThresholdButton.addEventListener('click', () => {
-            thresholdDiv.remove();
+            thresholdSection.remove();
             updateJSON();
         });
 
-        thresholdDiv.appendChild(pointsInput);
-        thresholdDiv.appendChild(addRewardButton);
-        thresholdDiv.appendChild(removeThresholdButton);
-        deck.appendChild(thresholdDiv);
+        thresholdSection.appendChild(pointsInput);
+        thresholdSection.appendChild(addRewardButton);
+        thresholdSection.appendChild(removeThresholdButton);
+        deck.appendChild(thresholdSection);
     }
 
     function createDeck() {
