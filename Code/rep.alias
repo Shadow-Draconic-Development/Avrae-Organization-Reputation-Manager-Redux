@@ -194,15 +194,15 @@ def get_rewards(ch: character, org_name: str, org_dict: dict, delta: int) -> lis
 
     # If change was positive
     if delta > 0:
-        verb_str = f"added {delta} to"
+        verb_str = f"Added {delta} to"
 
     # If change was negative
     elif delta < 0:
-        verb_str = f"removed {abs(delta)} from"
+        verb_str = f"Removed {abs(delta)} From"
 
     # Checking reputation
     else:
-        verb_str = "is checking"
+        verb_str = "Is Checking"
 
     # Adding header
     rewards_list.insert(0, f"**Current Reputation:** {cc_value}")
@@ -294,4 +294,4 @@ l = "<"
 -f "{{f}}"
 -color "{{color}}"
 -thumb "{{thumb}}"
--footer "{{ctx.prefix}}rep [organization name] {{l}}#> | 3/8/2025 | ShadowsStride"
+-footer "{{ctx.prefix}}rep [organization name] {{l}}#> | 5/2/2025 | ShadowsStride"
