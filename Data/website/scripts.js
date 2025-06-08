@@ -24,10 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function preventSingleQuotes(input) {
         input.addEventListener('input', (e) => {
             const value = e.target.value;
-            if (value.includes("'")) {
-                e.target.value = value.replace(/'/g, '');
-                alert("Single quotes (') are not allowed in inputs.");
-            }
             updateJSON();
         });
     }
@@ -70,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Surround the JSON with single quotes
-        jsonOutput.value = `'${JSON.stringify(output)}'`;
+        jsonOutput.value = `'${JSON.stringify(output).replaceAll("'", "\\'")}'`;
     }
 
     function toggleInputs(deck, disable) {
