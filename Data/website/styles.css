@@ -61,14 +61,14 @@ fieldset {
   border-radius: 5px;
 }
 
-.deck {
+.org {
   margin-bottom: 20px;
   padding: 15px;
   border: 1px solid #333;
   border-radius: 5px;
 }
 
-.deck input {
+.org input {
   display: block;
   margin: 8px 0;
   padding: 6px;
@@ -144,7 +144,7 @@ fieldset {
   border-color: #555;
 }
 
-.dark-mode .deck {
+.dark-mode .org {
   border-color: #555;
 }
 

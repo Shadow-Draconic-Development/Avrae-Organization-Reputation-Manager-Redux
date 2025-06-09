@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const decksContainer = document.getElementById('decksContainer');
-    const addDeckButton = document.getElementById('addDeck');
+    const orgsContainer = document.getElementById('orgsContainer');
+    const addOrgButton = document.getElementById('addOrg');
     const jsonOutput = document.getElementById('jsonOutput');
     const copyToClipboard = document.getElementById('copyToClipboard');
     const toggleTheme = document.getElementById('toggleTheme');
@@ -24,25 +24,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function preventSingleQuotes(input) {
         input.addEventListener('input', (e) => {
             const value = e.target.value;
+            if (value.includes("'")) {
+                e.target.value = value.replace(/'/g, '');
+                alert("Single quotes (') are not allowed in inputs.");
+            }
+
             updateJSON();
         });
     }
 
     function updateJSON() {
-        const decks = document.querySelectorAll('.deck');
+        const orgs = document.querySelectorAll('.org');
         const output = {};
 
-        decks.forEach(deck => {
-            const orgName = deck.querySelector('.org-name').value.trim();
+        orgs.forEach(org => {
+            const orgName = org.querySelector('.org-name').value.trim();
             if (!orgName) return;
 
-            const deleteCheckbox = deck.querySelector('.delete-org');
+            const deleteCheckbox = org.querySelector('.delete-org');
             if (deleteCheckbox.checked) {
                 output[orgName] = 'delete';
                 return;
             }
 
-            const thresholds = deck.querySelectorAll('.threshold');
+            const thresholds = org.querySelectorAll('.threshold');
             const orgData = {};
             thresholds.forEach(threshold => {
                 const points = threshold.querySelector('.points').value.trim();
@@ -57,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 orgData[points] = rewardArray;
             });
 
-            const imgUrl = deck.querySelector('.img-url').value.trim();
-            const color = deck.querySelector('.color').value.trim();
+            const imgUrl = org.querySelector('.img-url').value.trim();
+            const color = org.querySelector('.color').value.trim();
             if (imgUrl) orgData.imgurl = imgUrl;
             if (color) orgData.color = color;
 
@@ -69,8 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
         jsonOutput.value = `'${JSON.stringify(output).replaceAll("'", "\\'")}'`;
     }
 
-    function toggleInputs(deck, disable) {
-        const inputs = deck.querySelectorAll('input:not(.org-name):not(.delete-org), button:not(#removeDeckButton)');
+    function toggleInputs(org, disable) {
+        const inputs = org.querySelectorAll('input:not(.org-name):not(.delete-org), button:not(#removeOrgButton)');
         inputs.forEach(input => {
             input.disabled = disable;
             input.style.backgroundColor = disable ? '#d3d3d3' : '';
@@ -83,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rewardInput = document.createElement('input');
         rewardInput.type = 'text';
         rewardInput.placeholder = 'Reward';
-        preventSingleQuotes(rewardInput);
+        rewardInput.addEventListener('input', updateJSON);
 
         const removeRewardButton = document.createElement('button');
         removeRewardButton.textContent = 'Remove Reward';
@@ -97,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         thresholdSection.appendChild(rewardSection);
     }
 
-    function createThresholdInput(deck) {
+    function createThresholdInput(org) {
         const thresholdSection = document.createElement('section');
         thresholdSection.className = 'threshold';
 
@@ -123,18 +128,18 @@ document.addEventListener('DOMContentLoaded', () => {
         thresholdSection.appendChild(pointsInput);
         thresholdSection.appendChild(addRewardButton);
         thresholdSection.appendChild(removeThresholdButton);
-        deck.appendChild(thresholdSection);
+        org.appendChild(thresholdSection);
     }
 
-    function createDeck() {
-        const deck = document.createElement('fieldset');
-        deck.className = 'deck';
+    function createOrganization() {
+        const org = document.createElement('fieldset');
+        org.className = 'org';
 
         const orgNameInput = document.createElement('input');
         orgNameInput.type = 'text';
         orgNameInput.className = 'org-name';
         orgNameInput.placeholder = 'Organization Name';
-        preventSingleQuotes(orgNameInput);
+        orgNameInput.addEventListener('input', updateJSON);
 
         const deleteContainer = document.createElement('div');
         deleteContainer.className = 'delete-container';
@@ -143,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteCheckbox.className = 'delete-org';
         deleteCheckbox.id = `delete-org-${Date.now()}`;
         deleteCheckbox.addEventListener('change', () => {
-            toggleInputs(deck, deleteCheckbox.checked);
+            toggleInputs(org, deleteCheckbox.checked);
             updateJSON();
         });
 
@@ -170,28 +175,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const addThresholdButton = document.createElement('button');
         addThresholdButton.textContent = 'Add Threshold';
         addThresholdButton.addEventListener('click', () => {
-            createThresholdInput(deck);
+            createThresholdInput(org);
         });
 
-        const removeDeckButton = document.createElement('button');
-        removeDeckButton.id = 'removeDeckButton';
-        removeDeckButton.textContent = 'Remove Organization';
-        removeDeckButton.addEventListener('click', () => {
-            deck.remove();
+        const removeOrgButton = document.createElement('button');
+        removeOrgButton.id = 'removeOrgButton';
+        removeOrgButton.textContent = 'Remove Organization';
+        removeOrgButton.addEventListener('click', () => {
+            org.remove();
             updateJSON();
         });
 
-        deck.appendChild(orgNameInput);
-        deck.appendChild(deleteContainer);
-        deck.appendChild(imgUrlInput);
-        deck.appendChild(colorInput);
-        deck.appendChild(addThresholdButton);
-        deck.appendChild(removeDeckButton);
+        org.appendChild(orgNameInput);
+        org.appendChild(deleteContainer);
+        org.appendChild(imgUrlInput);
+        org.appendChild(colorInput);
+        org.appendChild(addThresholdButton);
+        org.appendChild(removeOrgButton);
 
-        decksContainer.appendChild(deck);
+        orgsContainer.appendChild(org);
     }
 
-    addDeckButton.addEventListener('click', createDeck);
+    addOrgButton.addEventListener('click', createOrganization);
 
     copyToClipboard.addEventListener('click', () => {
         jsonOutput.select();
@@ -199,6 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('JSON copied to clipboard!');
     });
 
-    // Initialize with one deck
-    createDeck();
+    
+    createOrganization();
 });
