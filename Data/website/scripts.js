@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Surround the JSON with single quotes
-        jsonOutput.value = `'${JSON.stringify(output).replaceAll("'", "\\'")}'`;
+        jsonOutput.value = `'${JSON.stringify(output).replace(/'/g, "\\'")}'`;;
     }
 
     function toggleInputs(org, disable) {
