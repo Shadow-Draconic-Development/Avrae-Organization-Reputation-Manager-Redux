@@ -71,8 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Surround the JSON with single quotes
-        const jsonString = JSON.stringify(output, null).replace(/'/g, "\\'"); // Use regex for compatibility
+        const jsonString = JSON.stringify(output).replace(/'/g, "\\'");
         jsonOutput.value = `'${jsonString}'`;
+
+        jsonOutput.dispatchEvent(new Event('input')); // Trigger input event
+        jsonOutput.dispatchEvent(new Event('change')); // Trigger change event
     }
 
     function toggleInputs(org, disable) {
