@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function preventSingleQuotes(input) {
         input.addEventListener('input', (e) => {
             const value = e.target.value;
-            if (value.includes("'")) {
-                e.target.value = value.replace(/'/g, '');
+            if (value.includes("'") | value.includes("‘") | value.includes("’") | value.includes("‚") | value.includes("‛"))  {
+                e.target.value = value.replace(/'/g, "").replace(/‘/g, "").replace(/’/g, "").replace(/‚/, "").replace(/‛/g, "");
                 alert("Single quotes (') are not allowed in inputs.");
             }
 
@@ -71,11 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Surround the JSON with single quotes
-        const jsonString = JSON.stringify(output).replace(/'/g, "\\'");
+        const jsonString = JSON.stringify(output).replace(/'/g, "\\'").replace(/‘/g, "\\'").replace(/’/g, "\\'").replace(/‚/, "\\'").replace(/‛/g, "\\'");
         jsonOutput.value = `'${jsonString}'`;
-
-        jsonOutput.dispatchEvent(new Event('input')); // Trigger input event
-        jsonOutput.dispatchEvent(new Event('change')); // Trigger change event
     }
 
     function toggleInputs(org, disable) {
