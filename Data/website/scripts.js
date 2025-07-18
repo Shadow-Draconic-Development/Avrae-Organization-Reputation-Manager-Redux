@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Surround the JSON with single quotes
-        const jsonString = JSON.stringify(output, null).replace(/'/g, "´"); // Use regex for compatibility
+        const jsonString = JSON.stringify(output, null).replace(/'/g, "\\'"); // Use regex for compatibility
         jsonOutput.value = `'${jsonString}'`;
     }
 
