@@ -146,8 +146,7 @@ def get_rewards(ch: character, org_name: str, org_dict: dict, delta: int) -> lis
     """
 
     img_url = org_dict.pop("imgurl", default="https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png")
-    color = org_dict.pop("color", default="")
-
+    color = org_dict.pop("color", default=color)
     cc_value = update_cc(ch, org_name, delta, img_url, color)
 
     # Builds rewards list
