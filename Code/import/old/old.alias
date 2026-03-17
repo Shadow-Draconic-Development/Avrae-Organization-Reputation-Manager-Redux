@@ -105,7 +105,7 @@ def main() -> tuple[str]:
 
     # Set defaults
     prefix = ctx.prefix
-    footer = f"{prefix}rep import old | 4/9/25 | ShadowsStride"
+    footer = f"{prefix}rep import old | 3/16/26 | ShadowsStride"
 
     # If SVAR does not exist, load empty dictionary
     if not (svar_dict := get_svar("org_rep_settings")):
@@ -125,7 +125,15 @@ def main() -> tuple[str]:
     # Merge old and new dictionaries
     svar_dict = svar_dict | old_svar_dict
 
-    return f"{prefix}embed -title 'Importing Old Data' -f 'Success! You may now delete old SVARs' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'", f"{prefix}svar org_rep_settings {dump_json(svar_dict)}"
+
+    try:
+        ch = character()
+
+    except:
+        color = ""
+
+
+    return f"{prefix}embed -title 'Importing Old Data' -f 'Success! You may now delete old SVARs' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}' -color '{color}'", f"{prefix}svar org_rep_settings {dump_json(svar_dict)}"
 
 
 # Main program function

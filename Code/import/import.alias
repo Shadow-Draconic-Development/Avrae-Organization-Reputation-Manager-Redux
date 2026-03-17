@@ -16,7 +16,7 @@ def main(input_dict: dict) -> tuple[str]:
 
     # Setup defaults
     prefix = ctx.prefix
-    footer = f"{prefix}rep import [JSON string] | 4/14/25 | ShadowsStride"
+    footer = f"{prefix}rep import [JSON string] | 3/16/26 | ShadowsStride"
 
     # If SVAR does not exist, load empty dictionary
     if not (svar_dict := get_svar("org_rep_settings")):
@@ -39,7 +39,13 @@ def main(input_dict: dict) -> tuple[str]:
         if typeof(value) == "str":
             svar_dict.pop(key)
 
-    return f"{prefix}embed -title 'Importing New Data' -f 'Success!' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'", f"{prefix}svar org_rep_settings {dump_json(svar_dict)}"
+    try:
+        ch = character()
+
+    except:
+        color = ""
+
+    return f"{prefix}embed -title 'Importing New Data' -f 'Success!' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}' -color '{color}'", f"{prefix}svar org_rep_settings {dump_json(svar_dict)}"
 
 
 # Grab inputs

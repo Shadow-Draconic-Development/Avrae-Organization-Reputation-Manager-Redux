@@ -7,41 +7,50 @@ embed
 # *******************************************************
 
 
-def search_key(query: str, key_list: list[str]) -> list[str]|str:
+def search_list(query: str, item_list: list[str]) -> list[str]|None:
     """
-    Searches for dictionary key.
+    Searches for item in list.
 
     Args:
         query (str): The query being made
-        key_list (list): List of keys
+        item_list (list): List of items
 
     Return:
-        (str): If it finds it, it returns the key, otherwise it returns 'None'
+        list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
     """
 
-    # Creates list to store matches
-    key_results = []
-
-    # Checks each item if a match occurs
-    for key in key_list:
-
-        # If matches
-        if query.lower() in key.lower():
-            key_results.append(key)
-
-        else:
-            pass
+    # Casefold query (so that number of total case folds is n+1)
+    query = query.casefold()
 
     # Finds at least 1 match
-    if len(key_results) > 0:
-        return key_results
-
-    # If it finds no matches
-    else:
-        return None
+    item_results = [item for item in item_list if query in item.casefold()]
+    return item_results or None
 
 
-def contstruct_final_string(list_of_lists: list[list[str]], list_num: int) -> str:
+def multiple_match_determine(search_result: list[str], target: str) -> str|None:
+    """
+    Determines if there is an exact match in search results
+    
+    Args:
+        search_result (list[str]): List of search results
+        target (str): Input value to match
+
+    Returns:
+        str|None: The exact match if found, otherwise None
+    """
+
+    # Casefold target (so that number of total case folds is n+1)
+    target = target.casefold()
+
+    # For each match in search result
+    for match in search_result:
+
+        # If exact match, return match
+        if match.casefold() == target:
+            return match
+
+
+def construct_final_string(list_of_lists: list[list[str]], list_num: int) -> str:
     """
     Constructs final string to be displayed
     
@@ -85,7 +94,7 @@ def grab_organization_logs(log_dictionary: dict, organization_name: str, list_nu
     Grabs organization details
 
     Args:
-        log_dictionary (dict): dictionary cotnaining all logs
+        log_dictionary (dict): dictionary containing all logs
         organization_name (str): Name of organization
         list_num (int): List number to return
 
@@ -97,7 +106,7 @@ def grab_organization_logs(log_dictionary: dict, organization_name: str, list_nu
     result_list = []
 
     # Searches for organization in organization
-    key_result = search_key(organization_name, log_dictionary.keys())
+    key_result = search_list(organization_name, log_dictionary.keys())
 
     # If it finds at least one match
     if key_result:
@@ -107,21 +116,17 @@ def grab_organization_logs(log_dictionary: dict, organization_name: str, list_nu
             found = True
             organization_name = key_result[0]
 
-        # If there is exactly one match, then set found to False
+        # If there is more than one match
         else:
-            found = False
 
-            # For each match
-            for key in key_result:
+            # If exact match, set found to true and set organization_name
+            if (search_result := multiple_match_determine(key_result, organization_name)):
+                found = True
+                organization_name = search_result
 
-                # If the match is not exact (non-case sensitive)
-                if key.lower() != organization_name.lower():
-                    pass
-
-                # If the match is exact (non-case sensitive), set found to true and set organization_name
-                else:
-                    found = True
-                    organization_name = key
+            # If not exact match, set found to false
+            else:
+                found = False
 
     # If there are no matches, set found to false
     else:
@@ -132,15 +137,15 @@ def grab_organization_logs(log_dictionary: dict, organization_name: str, list_nu
 
     # If found is true, add every log with the organization and add it to temp list made above
     if found:
-        for entry in log_dictionary[organization_name]['log']:
+        for entry in log_dictionary[organization_name]["log"]:
             result_list.append(entry)
 
         # Combine the logs into lists of 10
         temp_list = [result_list[i * list_length:(i + 1) * list_length] for i in range((len(result_list) + list_length - 1) // list_length)]
 
         # Grab image and color
-        img_url = log_dictionary[organization_name]['img_url']
-        color = log_dictionary[organization_name]['color']
+        img_url = log_dictionary[organization_name]["img_url"]
+        color = log_dictionary[organization_name]["color"]
 
     # If found is false, add every log with every organization and create another temp_list
     else:
@@ -151,7 +156,7 @@ def grab_organization_logs(log_dictionary: dict, organization_name: str, list_nu
             temp_list.append([f"**{log_key}**"])
 
             # For each entry log
-            for entry in log_value['log']:
+            for entry in log_value["log"]:
 
                 # If the most recent entry is within length, add log
                 if len(temp_list[-1]) < list_length:
@@ -165,7 +170,7 @@ def grab_organization_logs(log_dictionary: dict, organization_name: str, list_nu
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
         color = ""
 
-    return [found, contstruct_final_string(temp_list, list_num), organization_name, img_url, color]
+    return [found, construct_final_string(temp_list, list_num), organization_name, img_url, color]
 
 
 def main(input_list: list[str]) -> tuple[str]:
@@ -184,10 +189,14 @@ def main(input_list: list[str]) -> tuple[str]:
 
     # Set defaults
     img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
-    color = ""
+
+    # Checks to see if character is selected
+    try:
+        ch = character()
+        color = color
 
     # If character is not selected
-    if not (ch := character()):
+    except:
         return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
 
     # If their reputation log does not exist
@@ -231,7 +240,7 @@ def main(input_list: list[str]) -> tuple[str]:
         prep_str = ""
 
 
-    return f'{name} checks their reputation log{prep_str}', result_list[1], result_list[3], result_list[4]
+    return f"{name} checks their reputation log{prep_str}", result_list[1], result_list[3], result_list[4]
 
 
 # Main program function
@@ -244,4 +253,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "!rep log {{l}}organization> {{l}}#> | 4/9/2025 | ShadowsStride"
+-footer "{{ctx.prefix}}rep log {{l}}organization> {{l}}#> | 3/16/26 | ShadowsStride"

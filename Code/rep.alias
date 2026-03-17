@@ -14,32 +14,35 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
     """
 
+    # Casefold query (so that number of total case folds is n+1)
+    query = query.casefold()
+
     # Finds at least 1 match
-    if len(item_results := [item for item in item_list if query.lower() in item.lower()]) > 0:
-        return item_results
-
-    # If it finds no matches
-    else:
-        return None
+    item_results = [item for item in item_list if query in item.casefold()]
+    return item_results or None
 
 
-def multiple_match_determine(search_result: list[str], input_value: str) -> str|bool:
+def multiple_match_determine(search_result: list[str], target: str) -> str|None:
     """
     Determines if there is an exact match in search results
     
     Args:
         search_result (list[str]): List of search results
-        input_value (str): Input value to match
+        target (str): Input value to match
 
     Returns:
-        str|bool: The exact match if found, otherwise False
+        str|None: The exact match if found, otherwise None
     """
 
-    for match in search_result:
-        if match.lower() == input_value.lower():
-            return match
+    # Casefold target (so that number of total case folds is n+1)
+    target = target.casefold()
 
-    return False
+    # For each match in search result
+    for match in search_result:
+
+        # If exact match, return match
+        if match.casefold() == target:
+            return match
 
 
 def log_entry(ch: character, organization_name: str, delta: int, total: int, img_url: str, color: str) -> None:
@@ -70,10 +73,10 @@ def log_entry(ch: character, organization_name: str, delta: int, total: int, img
     # If the organization exists in the log
     if organization_name in rep_log_dict.keys():
         if "log" in rep_log_dict[organization_name].keys():
-            rep_log_dict[organization_name]['log'].append(time_str)
+            rep_log_dict[organization_name]["log"].append(time_str)
 
         else:
-            rep_log_dict[organization_name]['log'] = [time_str]
+            rep_log_dict[organization_name]["log"] = [time_str]
 
         rep_log_dict[organization_name]["img_url"] = img_url
         rep_log_dict[organization_name]["color"] = color
@@ -175,10 +178,6 @@ def get_rewards(ch: character, org_name: str, org_dict: dict, delta: int) -> lis
                 # Add divider
                 rewards_list.append("")
 
-            # If current cc value is not greater than key threshold
-            else:
-                pass
-
         # If key is not an integer
         except:
             pass
@@ -224,9 +223,12 @@ def main(input_list: list[str]) -> tuple[str]:
         str: Image URL
     """
 
+    # Try to load character object
+    try:
+        ch = character()
 
     # If character is not selected
-    if not (ch := character()):
+    except:
         return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
 
     # If SVAR exists, load dictionary
@@ -293,4 +295,4 @@ l = "<"
 -f "{{f}}"
 -color "{{color}}"
 -thumb "{{thumb}}"
--footer "{{ctx.prefix}}rep [organization name] {{l}}#> | 5/2/2025 | ShadowsStride"
+-footer "{{ctx.prefix}}rep [organization name] {{l}}#> | 3/16/26 | ShadowsStride"
