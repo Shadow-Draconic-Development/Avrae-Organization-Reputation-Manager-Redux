@@ -1,11 +1,13 @@
 <h1>Rep Alias<img align="right" src="../Data/image.png" width="100px"></h1>
 
-Alias that allows users to add/subtract/view their reputation with specified organizations
+Alias that allows users to add/subtract/view their reputation with specified organizations (if no organization is provided, just lists rep points for each organization above 0)
+
+For helping importing settings, see [this](https://shadow-draconic-development.github.io/Avrae-Organization-Reputation-Manager-Redux/)
 
 ## Usage:
-`!rep [organization] <#>`
+`!rep <organization> <#>`
 - `organization`
-    - Required
+    - Optional
     - Name of organization
 - `#`
     - Optional

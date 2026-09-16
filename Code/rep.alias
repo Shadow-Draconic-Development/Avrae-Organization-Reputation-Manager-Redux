@@ -241,8 +241,26 @@ def main(input_list: list[str]) -> tuple[str]:
 
     # If there isn't at least one input
     if len(input_list) < 1:
-        return "You Have Been Sneak Attacked by an Error", "Expected at least one argument", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
-    
+        
+        # Output list creation
+        output_list = []
+
+        # For each organization in SVAR dict
+        for org in svar_dict:
+
+            # If reputation counter exists
+            if ch.cc_exists(f"Rep - {org}"):
+
+                # If the counter is not 0, add organization with rep value to output list
+                if (cc_value := ch.cc(f"Rep - {org}").value) != 0:
+                    output_list.append(f"**{org}:** {cc_value}")
+
+        # If output list is empty
+        if len(output_list) == 0:
+            output_list.append("None")
+
+        return f"{name}'s Reputation", "\n".join(output_list), color, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+
     # If it finds at least one match (searching for organization names)
     if (search_result := search_list(input_list[0], svar_dict.keys())):
 
@@ -295,4 +313,4 @@ l = "<"
 -f "{{f}}"
 -color "{{color}}"
 -thumb "{{thumb}}"
--footer "{{ctx.prefix}}rep [organization name] {{l}}#> | 3/16/26 | ShadowsStride"
+-footer "{{ctx.prefix}}rep {{l}}organization name> {{l}}#> | 9/15/26 | ShadowsStride"
