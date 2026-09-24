@@ -1,4 +1,4 @@
-embed
+multiline
 <drac2>
 
 
@@ -45,7 +45,7 @@ def multiple_match_determine(search_result: list[str], target: str) -> str|None:
             return match
 
 
-def get_rewards(org_name: str, org_dict: dict, color: str) -> list[str]:
+def get_rewards(org_name: str, org_dict: dict, color: str, footer: str) -> str:
     """
     Constructs alias output
 
@@ -53,51 +53,101 @@ def get_rewards(org_name: str, org_dict: dict, color: str) -> list[str]:
         org_name (str): Name of organization
         org_dict (dict): Organization dictionary
         color (str): Color hex code
+        footer (str): Footer
 
     Return:
-        (list[str]): Result
+        str: Output string
     """
 
     # Sets img_url and color
     img_url = org_dict.pop("imgurl", default="https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png")
     color = org_dict.pop("color", default=color)
 
-    # Builds rewards list
-    rewards_list = ["***Current Redemption List:***", ""]
+    # Grab prefix
+    prefix = ctx.prefix
+
+    # Create reward key list
+    reward_key_list = []
 
     # For each key in the organization dictionary
-    for key in org_dict.keys():
-        
-        # Try to turn key into integer
+    for key in org_dict:
+
         try:
+
             int(key)
+            reward_key_list.append(key)
 
-            # Add threshold header
-            rewards_list.append(f"**{key} Points:**")
-
-            # Add rewards within threshold
-            for reward in org_dict[key]:
-                rewards_list.append(reward)
-
-            # Add divider
-            rewards_list.append("")
-
-        # If key is not an integer
         except:
             pass
 
-    # If there were any available rewards
-    if len(rewards_list) > 2:
-        rewards_list.pop(1)
+    reward_key_list.sort(key=int)
 
-    # If there were no available rewards
+    # Create reward output
+    reward_output = [[]]
+
+    # Set max character length and embed page
+    MAX_LENGTH = 950
+    i = 0
+
+    # For each reward key
+    for key in reward_key_list:
+
+        # If key is not 1
+        if key != "1":
+            org_dict[key].insert(0, f"**{key} Points:**")
+
+        # If key is 1
+        else:
+            org_dict[key].insert(0, f"**{key} Point:**")
+
+        # If length of output is less than or equal to max character length, add to embed page
+        if len("\n".join(reward_output[i] + org_dict[key])) <= MAX_LENGTH:
+            reward_output[i] += org_dict[key] + ["\n"]
+
+        # Increment page and add to embed page
+        else:
+            i += 1
+            reward_output.append(org_dict[key] + ["\n"])
+
+    # Insert header
+    reward_output[0].insert(0, "***Current Redemption/Reward List:***")
+
+    # If there are no rewards to display
+    if len(reward_output[0]) == 1:
+        reward_output[0].append("None")
+
+    # If there is only one embed page
+    if len(reward_output) == 1:
+        f = "\n".join(reward_output[0])
+
+        return f"{prefix}embed -title 'Rewards For {org_name}' -f '{f}' -color '{color}' -thumb '{img_url}' -footer '{footer}'"
+
+    # If there is more than one embed page
     else:
-        rewards_list[1] = "None"
+        f_output = []
 
-    return f"Rewards For {org_name}", "\n".join(rewards_list), img_url, color
+        # For each embed page
+        for output in reward_output:
+
+            # Join body content
+            f = "\n".join(output)
+
+            # If first embed page
+            if output == reward_output[0]:
+                f_output.append(f"{prefix}embed -color '{color}' -title 'Rewards For {org_name}' -f '{f}' -color '{color}' -thumb '{img_url}'")
+
+            # If last embed page
+            elif output == reward_output[-1]:
+                f_output.append(f"{prefix}embed -f '{f}' -color '{color}' -footer '{footer}'")
+
+            # If not first or last embed page
+            else:
+                f_output.append(f"{prefix}embed -f '{f}' -color '{color}'")
+
+        return "\n".join(f_output)
 
 
-def main(input_list: list[str]) -> tuple[str]:
+def main(input_list: list[str]) -> str:
     """
     Main program function
     
@@ -105,11 +155,11 @@ def main(input_list: list[str]) -> tuple[str]:
         input_list (list[str]): List of inputs
 
     Return:
-        str: Title
-        str: Main body paragraph
-        str: Color Hex Code
-        str: Image URL
+        str: Embed string
     """
+
+    prefix = ctx.prefix
+    footer = f"{prefix}rep rewards [organization name] | 9/22/26 | ShadowsStride"
 
     # Try to load character object
     try:
@@ -125,11 +175,11 @@ def main(input_list: list[str]) -> tuple[str]:
 
     # If SVAR does not exist, throw error
     else:
-        return "You Have Been Sneak Attacked by an Error", "`org_rep_settings` SVAR has not been setup", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '`org_rep_settings` SVAR has not been setup' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'"
 
     # If there isn't at least 1 input
     if len(input_list) < 1:
-        return "You Have Been Sneak Attacked by an Error", "Expected at least one argument", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected organization name' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'"
     
     # If it finds at least one match (searching for organization names)
     if (search_result := search_list(input_list[0], svar_dict.keys())):
@@ -148,23 +198,20 @@ def main(input_list: list[str]) -> tuple[str]:
             # If it does not find exact match
             else:
                 search_result.insert(0, "**Multiple Matches Found:**")
+                f = "\n".join(search_result)
 
-                return "You Have Been Sneak Attacked by an Error", "\n".join(search_result), "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '{f}' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'"
 
     # If it finds no matches
     else:
-        return "You Have Been Sneak Attacked by an Error", "Organization not found", "#CF142B", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png"
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Organization not found (`{input_list[0]}`)' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Organization-Reputation-Manager-Redux/refs/heads/main/Data/image.png' -footer '{footer}'"
 
-    return get_rewards(input_list[0], svar_dict[input_list[0]], color)
+    return get_rewards(input_list[0], svar_dict[input_list[0]], color, footer)
 
 
 # Main program function
-title, f, thumb, color = main(&ARGS&)
+output = main(&ARGS&)
 
 
 </drac2>
--title "{{title}}"
--f "{{f}}"
--color "{{color}}"
--thumb "{{thumb}}"
--footer "{{ctx.prefix}}rep rewards [organization name] | 3/16/26 | ShadowsStride"
+{{output}}
